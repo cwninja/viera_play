@@ -51,17 +51,18 @@ module VieraPlay
         TimeStamp.parse @doc.css('RelTime').first.content
       end
 
-      def duration
-        TimeStamp.parse @doc.css('TrackDuration').first.content
-      end
-
       def track
         sub_doc = @doc.css('TrackMetaData').first.content
         parsed_subdoc = Nokogiri::XML(sub_doc)
-        parsed_subdoc.xpath(
+        titles = parsed_subdoc.xpath(
           '//dc:title',
           'dc' => 'http://purl.org/dc/elements/1.1/'
-        ).first.content
+        )
+        if titles.empty?
+          ""
+        else
+          first.content
+        end
       end
     end
 
