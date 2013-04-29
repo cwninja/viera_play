@@ -61,6 +61,7 @@ module VieraPlay
         extract_content(titles).to_s
       end
 
+    protected
       def extract_content(result_set)
         result_set.map(&:content).first
       end
