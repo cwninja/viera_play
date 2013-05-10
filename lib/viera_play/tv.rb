@@ -14,9 +14,14 @@ module VieraPlay
       send_command("Stop")
     end
 
-    def pause
-      send_command("Pause")
+    def toggle_pause
+      if get_transport_info.playing?
+        send_command("Pause")
+      else
+        play
+      end
     end
+    alias pause toggle_pause
 
     def play
       send_command("Play", "Speed" => "1")
@@ -42,13 +47,51 @@ module VieraPlay
       play
     end
 
-    class PositionInfo
+    class SOAPInfo
       def initialize(xml)
         @doc = Nokogiri::XML(xml)
       end
 
+    protected
+      def extract_content(result_set)
+        result_set.map(&:content).first
+      end
+
+      def extract_css(css)
+        extract_content( @doc.css( css ) )
+      end
+    end
+
+    class TransportInfo < SOAPInfo
+      def playing?
+        current_transport_state == 'PLAYING'
+      end
+
+      def paused?
+        current_transport_state == 'PAUSED_PLAYBACK'
+      end
+
+      def stopped?
+        current_transport_state == 'STOPPED'
+      end
+
+    protected
+      def current_transport_state
+        @current_transport_state ||= extract_css('CurrentTransportState')
+      end
+    end
+
+    class PositionInfo < SOAPInfo
       def position
         TimeStamp.parse( extract_content( @doc.css( 'RelTime' ) ) )
+      end
+
+      def url
+        extract_content( @doc.css( 'TrackURI' ) )
+      end
+
+      def duration
+        TimeStamp.parse( extract_content( @doc.css( 'TrackDuration' ) ) )
       end
 
       def track
@@ -61,10 +104,6 @@ module VieraPlay
         extract_content(titles).to_s
       end
 
-    protected
-      def extract_content(result_set)
-        result_set.map(&:content).first
-      end
     end
 
     # Gets playback status information from the host. Returns a PositionInfo
@@ -72,6 +111,11 @@ module VieraPlay
     def get_position_info
       response = send_command("GetPositionInfo")
       PositionInfo.new response.body
+    end
+
+    def get_transport_info
+      response = send_command("GetTransportInfo")
+      TransportInfo.new response.body
     end
 
   private
