@@ -7,7 +7,7 @@ class TimeStamp
       val = -val if negative == '-'
       new(val)
     else
-      raise ArgumentError, "Bad timestamp" unless match
+      raise ArgumentError, "Bad timestamp: #{string}"
     end
   end
 
