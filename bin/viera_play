@@ -2,7 +2,19 @@
 
 require "viera_play"
 
-VieraPlay::Player.new(
-  :tv_control_url => ENV["TV_CONTROL_URL"],
-  :file_path => ARGV.first
-).call
+case ARGV.first
+when nil
+  STDERR.puts "Usage:"
+  STDERR.puts "# Play a file:\n\t#{$0} [FILENAME]"
+  STDERR.puts "# List available servers:\n\t#{$0} -l"
+  exit 1
+when '-l'
+  VieraPlay::Scanner.services.each do |name, url|
+    puts "#{name}\t#{url}"
+  end
+else
+  VieraPlay::Player.new(
+    :tv_control_url => ENV["TV_CONTROL_URL"],
+    :file_path => ARGV.first
+  ).call
+end
