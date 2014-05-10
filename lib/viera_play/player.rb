@@ -1,4 +1,8 @@
-require "curses"
+begin
+  require "curses"
+rescue LoadError
+end
+
 require "streamio-ffmpeg"
 
 module VieraPlay

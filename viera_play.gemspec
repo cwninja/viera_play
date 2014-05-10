@@ -20,6 +20,7 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency("nokogiri")
   gem.add_runtime_dependency("streamio-ffmpeg")
+  gem.add_runtime_dependency("log_switch")
 
   gem.add_development_dependency("rspec")
 end
